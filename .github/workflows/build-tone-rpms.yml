@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - tone.spec
+      - .github/workflows/build-tone-rpms.yml
 
 concurrency:
   group: audiobookshelf-rpmbuild

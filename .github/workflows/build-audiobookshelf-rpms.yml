@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - audiobookshelf.spec
+      - .github/workflows/build-audiobookshelf-rpms.yml
 
 concurrency:
   group: audiobookshelf-rpmbuild

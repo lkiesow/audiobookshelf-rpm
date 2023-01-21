@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - ffmpeg-static.spec
+      - .github/workflows/build-ffmpeg-rpms.yml
 
 concurrency:
   group: audiobookshelf-rpmbuild
