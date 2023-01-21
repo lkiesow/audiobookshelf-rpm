@@ -42,11 +42,11 @@ jobs:
 
       - name: download sources
         run: |
-          spectool -g -R ffmpeg-static.spec
+          spectool -g -R tone.spec
 
       - name: build rpm
         run: |
-          rpmbuild -ba ffmpeg-static.spec
+          rpmbuild -ba tone.spec
 
       - name: switch to repository branch
         run: |
