@@ -1,4 +1,4 @@
-name: Build Tone RPMs
+name: Build Audiobookshelf RPMs
 
 on:
   push:
@@ -26,7 +26,12 @@ jobs:
           dnf install -y
           createrepo
           git
+          nodejs
           rpmdevtools
+
+      - name: install pkg
+        run: |
+          npm install -g pkg
 
       - name: clone repository
         uses: actions/checkout@v3
@@ -42,11 +47,11 @@ jobs:
 
       - name: download sources
         run: |
-          spectool -g -R tone.spec
+          spectool -g -R audiobookshelf.spec
 
       - name: build rpm
         run: |
-          rpmbuild -ba tone.spec
+          rpmbuild -ba audiobookshelf.spec
 
       - name: switch to repository branch
         run: |
