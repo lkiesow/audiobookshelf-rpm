@@ -25,6 +25,7 @@ jobs:
         run: >
           dnf install -y
           createrepo
+          'dnf-command(builddep)'
           git
           nodejs
           rpmdevtools
@@ -44,6 +45,10 @@ jobs:
       - name: prepare build tree
         run: |
           rpmdev-setuptree
+
+      - name: install build dependencies
+        run: |
+          dnf builddep -y audiobookshelf.spec
 
       - name: download sources
         run: |
