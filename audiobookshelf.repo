@@ -1,0 +1,5 @@
+[audiobookshelf]
+name = Audiobookshelf el$releasever repository
+baseurl  = https://raw.githubusercontent.com/lkiesow/audiobookshelf-rpm/el$releasever/
+enabled  = 1
+gpgcheck = 0
