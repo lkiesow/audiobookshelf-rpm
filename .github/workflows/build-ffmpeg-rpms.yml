@@ -1,0 +1,87 @@
+name: Build FFmpeg RPMs
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: audiobookshelf-rpmbuild
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        osversion:
+          - '8'
+          - '9'
+    name: build (el${{ matrix.osversion }})
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/centos/centos:stream${{ matrix.osversion }}
+    steps:
+      - name: install tools
+        run: >
+          dnf install -y
+          createrepo
+          git
+          rpmdevtools
+
+      - name: clone repository
+        uses: actions/checkout@v3
+
+      - name: prepare git
+        run: |
+          git config --global user.name "Deployment Bot"
+          git config --global user.email "bot@lkiesow.dev"
+
+      - name: prepare build tree
+        run: |
+          rpmdev-setuptree
+
+      - name: download sources
+        run: |
+          spectool -g -R ffmpeg-static.spec
+
+      - name: build ffmpeg rpm
+        run: |
+          rpmbuild -ba ffmpeg-static.spec
+
+      - name: switch to repository branch
+        run: |
+          chown root:root .
+          git fetch
+          git checkout el${{ matrix.osversion }}
+
+      - name: copy rpms to repository
+        run: |
+          cp -v ~/rpmbuild/RPMS/x86_64/*.rpm .
+
+      - name: add new rpms
+        run: |
+          git add ./*.rpm
+
+      - name: update repository metadata
+        run: |
+          createrepo --update .
+          git add ./repodata/
+
+      - name: commit changes
+        run: |
+          git status
+          git diff --staged --quiet || git commit -m "Build $(date)"
+
+      - name: push updates
+        run: |
+          git remote -v
+          git push
+
+      - name: send notification
+        env:
+          MATRIX_TOKEN: ${{ secrets.MATRIX_TOKEN }}
+          URL_MESSAGE: 'https://matrix.org/_matrix/client/r0/rooms/%21gwaqKjZRpCQkpkTVwh%3Amatrix.org/send/m.room.message'
+        run: |
+          RPM="$(ls -1 ~/rpmbuild/RPMS/x86_64/ | tail -n1)"
+          MESSAGE="Finished building ${RPM} for Audiobookshelf"
+          curl -s -XPOST -d '{"msgtype":"m.text", "body":"'"${MESSAGE}"'"}' "${URL_MESSAGE}?access_token=${MATRIX_TOKEN}"
