@@ -5,8 +5,9 @@ on:
     branches:
       - main
     paths:
-      - tone.spec
       - .github/workflows/build-tone-rpms.yml
+      - audiobookshelf-rpm.key
+      - tone.spec
 
 concurrency:
   group: audiobookshelf-rpmbuild
@@ -29,7 +30,9 @@ jobs:
           dnf install -y
           createrepo
           git
+          gnupg
           rpmdevtools
+          rpm-sign
 
       - name: clone repository
         uses: actions/checkout@v3
@@ -38,6 +41,13 @@ jobs:
         run: |
           git config --global user.name "Deployment Bot"
           git config --global user.email "bot@lkiesow.dev"
+
+      - name: prepare gpg
+        env:
+          GPG_KEY: ${{ secrets.GPG_KEY }}
+        run: |
+          echo "${GPG_KEY}" | gpg --import
+          echo '%_gpg_name 1E8091C566FF00D9356DAE35D340FB28EF9633AE' > ~/.rpmmacros
 
       - name: prepare build tree
         run: |
@@ -56,6 +66,10 @@ jobs:
           chown root:root .
           git fetch
           git checkout el${{ matrix.osversion }}
+
+      - name: sign rpms
+        run: |
+          rpmsign --addsign ~/rpmbuild/RPMS/x86_64/*.rpm
 
       - name: copy rpms to repository
         run: |
