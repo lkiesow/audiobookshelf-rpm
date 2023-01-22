@@ -64,7 +64,7 @@ pkg -t node18-linux-x64 -o %{name} .
 
 # Update systemd unit
 sed -i 's#^WorkingDirectory=.*$#WorkingDirectory=%{_sharedstatedir}/%{name}#' build/debian/lib/systemd/system/audiobookshelf.service
-sed -i 's#^ExecStart=.*$#ExecStart=%{_bindir}/%{name}#' build/debian/lib/systemd/system/audiobookshelf.service
+sed -i 's#^ExecStart=.*$#ExecStart=%{_bindir}/%{name} --source=rpm#' build/debian/lib/systemd/system/audiobookshelf.service
 
 # Build configuration
 echo METADATA_PATH=%{_sharedstatedir}/%{name}/metadata  > etc-default-audiobookshelf
