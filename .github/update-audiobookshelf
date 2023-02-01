@@ -1,0 +1,29 @@
+#!/bin/sh
+
+echo "Checking Audiobookshelf"
+
+LATEST="$(
+	curl -s 'https://github.com/advplyr/audiobookshelf/releases' \
+		| sed -n 's_^.*href="/advplyr/audiobookshelf/tree/v\([^"]*\)".*$_\1_p' \
+		| head -n1
+	)"
+
+echo "Latest version:  $LATEST"
+
+PKG="$(
+	grep Version: audiobookshelf.spec \
+		| awk '{print $2}'
+	)"
+
+echo "Package version: $PKG"
+
+if [ "$LATEST" != "$PKG" ]; then
+	echo "Updating to ${LATEST}"
+
+	DATE="$(date "+%a %b %d %Y")"
+	USER="Lars Kiesow <lkiesow@uos.de>"
+	sed -i "s/^\(Version: *\)[^ ]*$/\1${LATEST}/" audiobookshelf.spec
+	sed -i "s/^%changelog/%changelog\n\* ${DATE} ${USER} - ${LATEST}-1\n- Update to ${LATEST}\n/" audiobookshelf.spec
+
+	git commit audiobookshelf.spec -m "Updating Audiobookshelf to ${LATEST}"
+fi
