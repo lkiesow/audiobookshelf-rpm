@@ -75,7 +75,7 @@ echo HOST=127.0.0.1                                    >> etc-default-audiobooks
 echo '#!/bin/sh'                > bin-%{name}
 echo 'cd %{_datadir}/%{name}/' >> bin-%{name}
 echo 'export PATH=.:$PATH'     >> bin-%{name}
-echo 'node prod.js'            >> bin-%{name}
+echo 'node prod.js $@'         >> bin-%{name}
 
 
 %install
