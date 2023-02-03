@@ -32,13 +32,8 @@ jobs:
           'dnf-command(builddep)'
           git
           gnupg
-          nodejs
           rpmdevtools
           rpm-sign
-
-      - name: install pkg
-        run: |
-          npm install -g pkg
 
       - name: clone repository
         uses: actions/checkout@v3

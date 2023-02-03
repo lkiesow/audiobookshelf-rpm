@@ -6,31 +6,31 @@
 %define uid   audiobookshelf
 %define gid   audiobookshelf
 
+%define node  18.14.0
+
 
 Name:          audiobookshelf
 Version:       2.2.14
-Release:       1%{?dist}
+Release:       2%{?dist}
 Summary:       A self-hosted audiobook and podcast server.
 
 Group:         Applications/Multimedia
 License:       GPL-3.0
 URL:           https://audiobookshelf.org
 Source0:       https://github.com/advplyr/audiobookshelf/archive/refs/tags/v%{version}.tar.gz
+Source1:       https://nodejs.org/dist/v%{node}/node-v%{node}-linux-x64.tar.gz
 
 BuildRequires: tar
 BuildRequires: gzip
-
-# Using Node.js 18.x will fail
-# For now, we get an old version in the build step
-BuildRequires: nodejs >= 16
-
-# We need https://github.com/vercel/pkg
-# But we just cheat and expect it to be installed already.
-# Install via:  npm install -g pkg
-#BuildRequires: nodejs-pkg
+BuildRequires: nodejs
 
 Requires: ffmpeg >= 4
 Requires: tone >= 0.1.3
+%if 0%{?el8}
+# we include node on el8
+%else
+Requires: nodejs >= 1:16
+%endif
 
 BuildRequires:     systemd
 Requires(post):    systemd
@@ -44,11 +44,12 @@ Audiobookshelf is a self-hosted audiobook and podcast server.
 
 %prep
 %setup -q
+%if 0%{?el8}
+tar xf %{SOURCE1}
+%endif
 
 
 %build
-
-
 # Build client
 cd client
 npm ci --unsafe-perm=true --allow-root
@@ -60,7 +61,6 @@ cd ..
 
 # Build server
 npm ci --only=production --unsafe-perm=true --allow-root
-pkg -t node18-linux-x64 -o %{name} .
 
 # Update systemd unit
 sed -i 's#^WorkingDirectory=.*$#WorkingDirectory=%{_sharedstatedir}/%{name}#' build/debian/lib/systemd/system/audiobookshelf.service
@@ -72,6 +72,10 @@ echo CONFIG_PATH=%{_sharedstatedir}/%{name}/config     >> etc-default-audiobooks
 echo PORT=13378                                        >> etc-default-audiobookshelf
 echo HOST=127.0.0.1                                    >> etc-default-audiobookshelf
 
+echo '#!/bin/sh'                > bin-%{name}
+echo 'cd %{_datadir}/%{name}/' >> bin-%{name}
+echo 'export PATH=.:$PATH'     >> bin-%{name}
+echo 'node prod.js'            >> bin-%{name}
 
 
 %install
@@ -80,6 +84,16 @@ rm -rf %{buildroot}
 # Create directories
 mkdir -m 755 -p %{buildroot}%{_sharedstatedir}/%{name}/metadata
 mkdir -m 755 -p %{buildroot}%{_sharedstatedir}/%{name}/config
+mkdir -m 755 -p %{buildroot}%{_datadir}/%{name}/client
+
+# Add node
+%if 0%{?el8}
+install -m 0755 node-v*/bin/node %{buildroot}%{_datadir}/%{name}/node
+%endif
+
+# Add Audiobookshelf
+mv client/dist/ %{buildroot}%{_datadir}/%{name}/client/
+mv node_modules/ package.json package-lock.json prod.js server/ %{buildroot}%{_datadir}/%{name}/
 
 # Install systemd unit file
 install -p -D -m 0644 \
@@ -90,7 +104,7 @@ install -p -D -m 0644 \
 install -p -D -m 0644 etc-default-audiobookshelf %{buildroot}%{_sysconfdir}/default/%{name}
 
 # Install binary
-install -p -D -m 0755 %{name} %{buildroot}%{_bindir}/%{name}
+install -p -D -m 0755 bin-%{name} %{buildroot}%{_bindir}/%{name}
 
 
 %pre
@@ -106,6 +120,10 @@ fi
 %post
 %systemd_post audiobookshelf.service
 
+# (SELinux) Allow httpd to serve client directly
+semanage fcontext -a -t httpd_sys_content_t "%{_datadir}/%{name}/client/dist(/.*)?" || :
+restorecon -R -v "%{_datadir}/%{name}/client/dist/" || :
+
 
 %preun
 %systemd_preun audiobookshelf.service
@@ -119,10 +137,16 @@ fi
 %config(noreplace) %{_sysconfdir}/default/%{name}
 %{_unitdir}/%{name}.service
 %{_bindir}/%{name}
+%{_datadir}/%{name}
 %attr(755,%{uid},%{gid}) %{_sharedstatedir}/%{name}
 
 
 %changelog
+* Thu Feb 02 2023 Lars Kiesow <lkiesow@uos.de> - 2.2.14-2
+- Package built without pkg
+- Include node binary on el8 only
+- Allow httpd to deliver client )SELinux label=
+
 * Thu Feb 02 2023 Lars Kiesow <lkiesow@uos.de> - 2.2.14-1
 - Update to 2.2.14
 
