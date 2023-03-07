@@ -97,10 +97,16 @@ jobs:
           git push
 
       - name: send notification
-        env:
-          MATRIX_TOKEN: ${{ secrets.MATRIX_TOKEN }}
-          URL_MESSAGE: 'https://matrix.org/_matrix/client/r0/rooms/%21gwaqKjZRpCQkpkTVwh%3Amatrix.org/send/m.room.message'
-        run: |
-          RPM="$(ls -1 ~/rpmbuild/RPMS/noarch/ | tail -n1)"
-          MESSAGE="Finished building ${RPM} for Audiobookshelf"
-          curl -s -XPOST -d '{"msgtype":"m.text", "body":"'"${MESSAGE}"'"}' "${URL_MESSAGE}?access_token=${MATRIX_TOKEN}"
+        uses: lkiesow/matrix-notification@v1
+        with:
+          token: ${{ secrets.MATRIX_TOKEN }}
+          room: '!gwaqKjZRpCQkpkTVwh:matrix.org'
+          message: Finished building audiobookshelf-repository (el${{ matrix.osversion }})
+
+      - name: failure notification
+        if: ${{ failure() }}
+        uses: lkiesow/matrix-notification@v1
+        with:
+          token: ${{ secrets.MATRIX_TOKEN }}
+          room: '!gwaqKjZRpCQkpkTVwh:matrix.org'
+          message: Error building audiobookshelf-repository (el${{ matrix.osversion }})
