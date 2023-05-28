@@ -3,7 +3,7 @@
 %global __os_install_post %{nil}
 
 Name:           tone
-Version:        0.1.3
+Version:        0.1.5
 Release:        1%{?dist}
 Summary:        Modify audio metadata
 
@@ -45,5 +45,8 @@ cp %{SOURCE2} .
 
 
 %changelog
+* Sun May 28 2023 Lars Kiesow <lkiesow@uos.de> - 0.1.5-1
+- Update to tone 0.1.5
+
 * Fri Jan 20 2023 Lars Kiesow <lkiesow@uos.de> - 0.1.3-1
 - Initial build
