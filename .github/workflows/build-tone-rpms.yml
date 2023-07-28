@@ -95,11 +95,14 @@ jobs:
           git remote -v
           git push
 
+      - name: Setup Matrix
+        uses: lkiesow/matrix-notification@v1
+        with:
+          room: '!gwaqKjZRpCQkpkTVwh:matrix.org'
+          token: ${{ secrets.MATRIX_TOKEN }}
+          tool: true
+
       - name: send notification
-        env:
-          MATRIX_TOKEN: ${{ secrets.MATRIX_TOKEN }}
-          URL_MESSAGE: 'https://matrix.org/_matrix/client/r0/rooms/%21gwaqKjZRpCQkpkTVwh%3Amatrix.org/send/m.room.message'
         run: |
           RPM="$(ls -1 ~/rpmbuild/RPMS/x86_64/ | tail -n1)"
-          MESSAGE="Finished building ${RPM} for Audiobookshelf"
-          curl -s -XPOST -d '{"msgtype":"m.text", "body":"'"${MESSAGE}"'"}' "${URL_MESSAGE}?access_token=${MATRIX_TOKEN}"
+          matrix-msg "Finished building ${RPM} for Audiobookshelf"
