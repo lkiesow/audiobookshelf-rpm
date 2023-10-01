@@ -10,7 +10,7 @@
 
 
 Name:          audiobookshelf
-Version:       2.4.3
+Version:       2.4.4
 Release:       2%{?dist}
 Summary:       A self-hosted audiobook and podcast server.
 
@@ -142,6 +142,9 @@ restorecon -R -v "%{_datadir}/%{name}/client/dist/" || :
 
 
 %changelog
+* Sun Oct 01 2023 Lars Kiesow <lkiesow@uos.de> - 2.4.4-1
+- Update to 2.4.4
+
 * Mon Sep 18 2023 Lars Kiesow <lkiesow@uos.de> - 2.4.3-1
 - Update to 2.4.3
 
