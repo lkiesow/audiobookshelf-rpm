@@ -60,7 +60,7 @@ PATH=./node-v16.19.0-linux-x64/bin:$PATH npm run generate
 cd ..
 
 # Build server
-npm ci --only=production --unsafe-perm=true --allow-root
+PATH=./client/node-v16.19.0-linux-x64/bin:$PATH npm ci --only=production --unsafe-perm=true --allow-root
 
 # Update systemd unit
 sed -i 's#^WorkingDirectory=.*$#WorkingDirectory=%{_sharedstatedir}/%{name}#' build/debian/lib/systemd/system/audiobookshelf.service
