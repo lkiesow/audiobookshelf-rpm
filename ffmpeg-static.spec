@@ -7,12 +7,12 @@
 
 Name:          ffmpeg
 Summary:       Hyper fast MPEG1/MPEG4/H263/RV and AC3/MPEG audio encoder
-Version:       5.1.2.git.%{date}
+Version:       6.1
 Release:       1%{?dist}
 License:       GPLv3+
 Group:         System Environment/Libraries
 
-Source:        https://radosgw.public.os.wwu.de/opencast-ffmpeg-static/%{name}-%{date}-%{nversion}.tar.xz
+Source:        https://radosgw.public.os.wwu.de/opencast-ffmpeg-static/%{name}-%{version}-amd64-static.tar.xz
 URL:           https://ffmpeg.org
 BuildRoot:     %{_tmppath}/%{name}-root
 
@@ -28,7 +28,7 @@ quality polyphase filter.
 
 
 %prep
-%setup -q -n %{name}-%{date}-%{nversion}
+%setup -q -n %{name}-%{version}-amd64-static
 
 
 %build
@@ -41,7 +41,7 @@ install -p -d -m 0755 %{buildroot}%{_bindir}
 install -p -d -m 0755 %{buildroot}%{_mandir}
 install -p ffmpeg %{buildroot}%{_bindir}
 install -p ffprobe %{buildroot}%{_bindir}
-cp -r man/man1/ %{buildroot}%{_mandir}/
+install -p qt-faststart %{buildroot}%{_bindir}
 
 
 %clean
@@ -50,14 +50,13 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-#%doc GPLv3.txt
+%doc GPLv3.txt
 %{_bindir}/*
-%{_mandir}/
 
 
 %changelog
-* Fri Jan 20 2023 Lars Kiesow <lkiesow@uos.de> - 5.1.2.git.20221226041111-1
-- Update to latest git version
+* Fri Nov 24 2023 Lars Kiesow <lkiesow@uos.de> - 6.1-1
+- Update to static 6.1
 
 * Wed Dec 14 2022 Lars Kiesow <lkiesow@uos.de> - 5.1.2.git.20221212044324-1
 - Update to latest git version
