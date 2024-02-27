@@ -32,6 +32,7 @@ jobs:
           'dnf-command(builddep)'
           git
           gnupg
+          jq
           rpmdevtools
           rpm-sign
 
