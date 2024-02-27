@@ -54,13 +54,13 @@ tar xf %{SOURCE1}
 cd client
 npm ci --unsafe-perm=true --allow-root
 # Hack to get a node.js version which lets us build the client
-curl -O https://nodejs.org/download/release/v16.19.0/node-v16.19.0-linux-x64.tar.gz
-tar xf node-v16.19.0-linux-x64.tar.gz
-PATH=./node-v16.19.0-linux-x64/bin:$PATH npm run generate
+curl -O https://nodejs.org/download/release/v20.11.1/node-v20.11.1-linux-x64.tar.gz
+tar xf node-v20.11.1-linux-x64.tar.gz
+PATH=./node-v20.11.1-linux-x64/bin:$PATH npm run generate
 cd ..
 
 # Build server
-PATH=./client/node-v16.19.0-linux-x64/bin:$PATH npm ci --only=production --unsafe-perm=true --allow-root
+PATH=./client/node-v20.11.1-linux-x64/bin:$PATH npm ci --only=production --unsafe-perm=true --allow-root
 
 # Update systemd unit
 sed -i 's#^WorkingDirectory=.*$#WorkingDirectory=%{_sharedstatedir}/%{name}#' build/debian/lib/systemd/system/audiobookshelf.service
@@ -142,6 +142,9 @@ restorecon -R -v "%{_datadir}/%{name}/client/dist/" || :
 
 
 %changelog
+* Tue Feb 27 2024 Lars Kiesow <lkiesow@uos.de> - 2.8.0-2
+- Use Node.js 20.x
+
 * Tue Feb 20 2024 Lars Kiesow <lkiesow@uos.de> - 2.8.0-1
 - Update to 2.8.0
 
