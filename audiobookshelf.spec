@@ -6,7 +6,7 @@
 %define uid   audiobookshelf
 %define gid   audiobookshelf
 
-%define node  18.14.0
+%define node  20.11.1
 
 
 Name:          audiobookshelf
@@ -18,7 +18,7 @@ Group:         Applications/Multimedia
 License:       GPL-3.0
 URL:           https://audiobookshelf.org
 Source0:       https://github.com/advplyr/audiobookshelf/archive/refs/tags/v%{version}.tar.gz
-Source1:       https://nodejs.org/dist/v%{node}/node-v%{node}-linux-x64.tar.gz
+Source1:       https://nodejs.org/download/release/v%{node}/node-v%{node}-linux-x64.tar.gz
 
 BuildRequires: tar
 BuildRequires: gzip
@@ -26,11 +26,8 @@ BuildRequires: nodejs
 
 Requires: ffmpeg >= 4
 Requires: tone >= 0.1.3
-%if 0%{?el8}
-# we include node on el8
-%else
-Requires: nodejs >= 1:16
-%endif
+# we need node 20
+#Requires: nodejs >= 1:20
 
 BuildRequires:     systemd
 Requires(post):    systemd
@@ -44,23 +41,22 @@ Audiobookshelf is a self-hosted audiobook and podcast server.
 
 %prep
 %setup -q
-%if 0%{?el8}
 tar xf %{SOURCE1}
-%endif
 
 
 %build
+# Set npm path
+npmpath="$(readlink -f node-v20.11.1-linux-x64/bin)"
+export PATH=${npmpath}:${PATH}
+
 # Build client
 cd client
 npm ci --unsafe-perm=true --allow-root
-# Hack to get a node.js version which lets us build the client
-curl -O https://nodejs.org/download/release/v20.11.1/node-v20.11.1-linux-x64.tar.gz
-tar xf node-v20.11.1-linux-x64.tar.gz
-PATH=./node-v20.11.1-linux-x64/bin:$PATH npm run generate
+npm run generate
 cd ..
 
 # Build server
-PATH=./client/node-v20.11.1-linux-x64/bin:$PATH npm ci --only=production --unsafe-perm=true --allow-root
+npm ci --only=production --unsafe-perm=true --allow-root
 
 # Update systemd unit
 sed -i 's#^WorkingDirectory=.*$#WorkingDirectory=%{_sharedstatedir}/%{name}#' build/debian/lib/systemd/system/audiobookshelf.service
@@ -87,9 +83,7 @@ mkdir -m 755 -p %{buildroot}%{_sharedstatedir}/%{name}/config
 mkdir -m 755 -p %{buildroot}%{_datadir}/%{name}/client
 
 # Add node
-%if 0%{?el8}
 install -m 0755 node-v*/bin/node %{buildroot}%{_datadir}/%{name}/node
-%endif
 
 # Add Audiobookshelf
 mv client/dist/ %{buildroot}%{_datadir}/%{name}/client/
