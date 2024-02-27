@@ -111,11 +111,11 @@ jobs:
       - name: send success notification
         run: |
           RPM="$(ls -1 ~/rpmbuild/RPMS/x86_64/ | tail -n1)"
-          matrix-msg "Finished building ${RPM} for Audiobookshelf"
+          ~/.local/bin/matrix-msg "Finished building ${RPM} for Audiobookshelf"
 
       - name: send failure notification
         if: failure()
         run: |
           VERSION="$(sed -n 's/^Version: *//p' audiobookshelf.spec)"
           OS="(el${{ matrix.osversion }})"
-          matrix-msg "Building Audiobookshelf ${VERSION} RPMs ${OS} failed"
+          ~/.local/bin/matrix-msg "Building Audiobookshelf ${VERSION} RPMs ${OS} failed"
