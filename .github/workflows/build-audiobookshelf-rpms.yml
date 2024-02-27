@@ -101,6 +101,7 @@ jobs:
           git push
 
       - name: set up matrix-msg
+        if: always()
         uses: lkiesow/matrix-notification@v1
         with:
           room: '!gwaqKjZRpCQkpkTVwh:matrix.org'
@@ -110,11 +111,11 @@ jobs:
       - name: send success notification
         run: |
           RPM="$(ls -1 ~/rpmbuild/RPMS/x86_64/ | tail -n1)"
-          ~/.local/bin/matrix-msg "Finished building ${RPM} for Audiobookshelf"
+          matrix-msg "Finished building ${RPM} for Audiobookshelf"
 
       - name: send failure notification
         if: failure()
         run: |
           VERSION="$(sed -n 's/^Version: *//p' audiobookshelf.spec)"
           OS="(el${{ matrix.osversion }})"
-          ~/.local/bin/matrix-msg "Building Audiobookshelf ${VERSION} RPMs ${OS} failed"
+          matrix-msg "Building Audiobookshelf ${VERSION} RPMs ${OS} failed"
