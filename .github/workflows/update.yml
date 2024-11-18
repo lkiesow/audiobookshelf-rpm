@@ -27,7 +27,7 @@ jobs:
 
     - name: clone repository
       run: |
-        git clone "git@github.com:lkiesow/audiobookshelf-rpm.git" audiobookshelf-rpm-clone
+        git clone -b main --single-branch "git@github.com:lkiesow/audiobookshelf-rpm.git" audiobookshelf-rpm-clone
 
     - name: update specs
       working-directory: audiobookshelf-rpm-clone
