@@ -32,6 +32,7 @@ jobs:
           createrepo
           git
           gnupg
+          jq
           rpmdevtools
           rpm-sign
 
