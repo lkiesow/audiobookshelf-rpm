@@ -103,7 +103,14 @@ jobs:
           token: ${{ secrets.MATRIX_TOKEN }}
           tool: true
 
-      - name: send notification
+      - name: send success notification
         run: |
           RPM="$(ls -1 ~/rpmbuild/RPMS/x86_64/ | tail -n1)"
-          matrix-msg "Finished building ${RPM} for Audiobookshelf"
+          ~/.local/bin/matrix-msg "Finished building ${RPM} for Audiobookshelf"
+
+      - name: send failure notification
+        if: failure()
+        run: |
+          VERSION="$(sed -n 's/^Version: *//p' tone.spec)"
+          OS="(el${{ matrix.osversion }})"
+          ~/.local/bin/matrix-msg "Building Tone ${VERSION} RPMs ${OS} failed"
