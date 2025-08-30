@@ -66,7 +66,7 @@ jobs:
       - name: switch to repository branch
         run: |
           chown root:root .
-          git fetch
+          git fetch origin el${{ matrix.osversion }}
           git checkout el${{ matrix.osversion }}
 
       - name: sign rpms
