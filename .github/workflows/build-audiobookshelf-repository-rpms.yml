@@ -25,7 +25,7 @@ jobs:
     name: build (el${{ matrix.osversion }})
     runs-on: ubuntu-latest
     container:
-      image: docker.io/library/rockylinux:${{ matrix.osversion }}
+      image: docker.io/library/almalinux:${{ matrix.osversion }}
     steps:
       - name: install tools
         run: >
