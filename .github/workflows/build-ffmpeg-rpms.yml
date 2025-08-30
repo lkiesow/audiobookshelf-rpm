@@ -20,10 +20,11 @@ jobs:
         osversion:
           - '8'
           - '9'
+          - '10'
     name: build (el${{ matrix.osversion }})
     runs-on: ubuntu-latest
     container:
-      image: docker.io/library/rockylinux:${{ matrix.osversion }}
+      image: docker.io/library/almalinux:${{ matrix.osversion }}
     steps:
       - name: install tools
         run: >
@@ -64,7 +65,7 @@ jobs:
       - name: switch to repository branch
         run: |
           chown root:root .
-          git fetch
+          git fetch origin el${{ matrix.osversion }}
           git checkout el${{ matrix.osversion }}
 
       - name: sign rpms
