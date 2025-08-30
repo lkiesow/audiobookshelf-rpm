@@ -21,6 +21,7 @@ jobs:
         osversion:
           - '8'
           - '9'
+          - '10'
     name: build (el${{ matrix.osversion }})
     runs-on: ubuntu-latest
     container:
