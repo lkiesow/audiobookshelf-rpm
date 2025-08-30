@@ -1,7 +1,12 @@
 # Audiobookshelf RPM Repository
 
 This repository provides RPM packages for [Audiobookshelf](https://www.audiobookshelf.org/).
-Supported operating systems are all Red Hat and CentOS Stream 8/9 variants.
+Supported operating systems are all Red Hat and CentOS Stream 8/9/10 variants like:
+
+- RHEL
+- CentOS Stream
+- Rocky Linux
+- AlmaLinux
 
 ## Installation
 
