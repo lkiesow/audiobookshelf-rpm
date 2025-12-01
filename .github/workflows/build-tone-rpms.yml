@@ -37,7 +37,7 @@ jobs:
           rpm-sign
 
       - name: clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: prepare git
         run: |
