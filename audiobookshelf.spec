@@ -6,12 +6,12 @@
 %define uid   audiobookshelf
 %define gid   audiobookshelf
 
-%define node  20.11.1
+%define node  24.22.1
 
 
 Name:          audiobookshelf
 Version:       2.37.1
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       A self-hosted audiobook and podcast server.
 
 Group:         Applications/Multimedia
@@ -26,7 +26,7 @@ BuildRequires: nodejs
 
 Requires: ffmpeg >= 4
 Requires: tone >= 0.1.3
-# we need node 20
+# we need node 24
 #Requires: nodejs >= 1:20
 
 BuildRequires:     systemd
@@ -46,17 +46,17 @@ tar xf %{SOURCE1}
 
 %build
 # Set npm path
-npmpath="$(readlink -f node-v20.11.1-linux-x64/bin)"
+npmpath="$(readlink -f node-v%{node}-linux-x64/bin)"
 export PATH=${npmpath}:${PATH}
 
 # Build client
 cd client
-npm ci --unsafe-perm=true --allow-root
+npm ci
 npm run generate
 cd ..
 
 # Build server
-npm ci --only=production --unsafe-perm=true --allow-root
+npm ci --omit=dev
 
 # Update systemd unit
 sed -i 's#^WorkingDirectory=.*$#WorkingDirectory=%{_sharedstatedir}/%{name}#' build/debian/lib/systemd/system/audiobookshelf.service
@@ -136,6 +136,10 @@ restorecon -R -v "%{_datadir}/%{name}/client/dist/" || :
 
 
 %changelog
+* Thu Oct 22 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.1-3
+- Update bundled Node.js to 24.22.1 (October 2026 security release)
+- Replace deprecated npm flags
+
 * Wed Sep 30 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.1-1
 - Update to 2.37.1
 
