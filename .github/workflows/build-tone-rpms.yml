@@ -86,16 +86,19 @@ jobs:
           createrepo --update .
           git add ./repodata/
 
-      - name: commit changes
+      # The repository branches only ever consist of a single commit holding
+      # the current repository. Keeping the history around would retain every
+      # package ever built, growing the git repository by one RPM per build.
+      - name: commit repository snapshot
         run: |
+          git checkout --orphan snapshot
           git status
           RPM="$(ls -1 ~/rpmbuild/RPMS/x86_64/ | tail -n1)"
-          git diff --staged --quiet || git commit -m "Build ${RPM} $(date)"
+          git commit -m "Build ${RPM} $(date)"
 
       - name: push updates
         run: |
-          git remote -v
-          git push
+          git push --force origin snapshot:el${{ matrix.osversion }}
 
       - name: Setup Matrix
         uses: lkiesow/matrix-notification@v1
