@@ -29,10 +29,13 @@ UPDATED=
 
 echo "Checking Audiobookshelf"
 
+# Use the workflow's token when available to avoid the low unauthenticated
+# API rate limit shared by GitHub Actions runners.
 LATEST="$(
-	curl -s 'https://github.com/advplyr/audiobookshelf/releases' \
-		| sed -n 's_^.*href="/advplyr/audiobookshelf/tree/v\([^"]*\)".*$_\1_p' \
-		| head -n1
+	curl -s ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
+		'https://api.github.com/repos/advplyr/audiobookshelf/releases/latest' \
+		| jq -r '.tag_name // empty' \
+		| sed 's/^v//'
 	)"
 PKG="$(spec_field Version)"
 

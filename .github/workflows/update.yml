@@ -31,6 +31,8 @@ jobs:
 
     - name: update specs
       working-directory: audiobookshelf-rpm-clone
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         .github/update-audiobookshelf
 
