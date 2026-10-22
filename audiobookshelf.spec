@@ -11,7 +11,7 @@
 
 Name:          audiobookshelf
 Version:       2.37.1
-Release:       3%{?dist}
+Release:       4%{?dist}
 Summary:       A self-hosted audiobook and podcast server.
 
 Group:         Applications/Multimedia
@@ -56,6 +56,11 @@ npm run generate
 cd ..
 
 # Build server
+# First install includes dev dependencies for the TypeScript compiler,
+# second install produces the production dependency tree.
+npm ci --ignore-scripts
+npm run build:server
+rm -rf node_modules
 npm ci --omit=dev
 
 # Update systemd unit
@@ -71,7 +76,7 @@ echo HOST=127.0.0.1                                    >> etc-default-audiobooks
 echo '#!/bin/sh'                > bin-%{name}
 echo 'cd %{_datadir}/%{name}/' >> bin-%{name}
 echo 'export PATH=.:$PATH'     >> bin-%{name}
-echo 'node prod.js $@'         >> bin-%{name}
+echo 'node dist-server/index.js $@' >> bin-%{name}
 
 
 %install
@@ -87,7 +92,8 @@ install -m 0755 node-v*/bin/node %{buildroot}%{_datadir}/%{name}/node
 
 # Add Audiobookshelf
 mv client/dist/ %{buildroot}%{_datadir}/%{name}/client/
-mv node_modules/ package.json package-lock.json prod.js server/ %{buildroot}%{_datadir}/%{name}/
+rm -rf dist-server/test dist-server/.tsbuildinfo
+mv node_modules/ package.json package-lock.json index.js server/ dist-server/ %{buildroot}%{_datadir}/%{name}/
 
 # Install systemd unit file
 install -p -D -m 0644 \
@@ -136,6 +142,10 @@ restorecon -R -v "%{_datadir}/%{name}/client/dist/" || :
 
 
 %changelog
+* Thu Oct 22 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.1-4
+- Build and run the compiled server entry point (dist-server/index.js)
+  like upstream's Docker and Debian packages instead of prod.js
+
 * Thu Oct 22 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.1-3
 - Update bundled Node.js to 24.22.1 (October 2026 security release)
 - Replace deprecated npm flags
