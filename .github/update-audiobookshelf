@@ -1,5 +1,32 @@
 #!/bin/sh
 
+set -e
+
+SPEC=audiobookshelf.spec
+USER="Lars Kiesow <lkiesow@uos.de>"
+DATE="$(date "+%a %b %d %Y")"
+
+spec_field() {
+	sed -n "s/^$1: *\([^ ]*\).*$/\1/p" "$SPEC"
+}
+
+# Add a changelog entry for the current Version-Release with the given text.
+add_changelog() {
+	sed -i "s/^%changelog/%changelog\n\* ${DATE} ${USER} - $(spec_field Version)-$(spec_field Release | sed 's/%.*//')\n- $1\n/" "$SPEC"
+}
+
+# Append a line to the most recent changelog entry.
+append_changelog() {
+	sed -i "0,/^- .*$/s//&\n- $1/" "$SPEC"
+}
+
+set_release() {
+	sed -i "s/^\(Release: *\)[0-9]*\(.*\)$/\1$1\2/" "$SPEC"
+}
+
+UPDATED=
+
+
 echo "Checking Audiobookshelf"
 
 LATEST="$(
@@ -7,23 +34,42 @@ LATEST="$(
 		| sed -n 's_^.*href="/advplyr/audiobookshelf/tree/v\([^"]*\)".*$_\1_p' \
 		| head -n1
 	)"
+PKG="$(spec_field Version)"
 
 echo "Latest version:  $LATEST"
-
-PKG="$(
-	grep Version: audiobookshelf.spec \
-		| awk '{print $2}'
-	)"
-
 echo "Package version: $PKG"
 
-if [ "$LATEST" != "$PKG" ]; then
+if [ -n "$LATEST" ] && [ "$LATEST" != "$PKG" ]; then
 	echo "Updating to ${LATEST}"
+	sed -i "s/^\(Version: *\)[^ ]*$/\1${LATEST}/" "$SPEC"
+	set_release 1
+	add_changelog "Update to ${LATEST}"
+	git commit "$SPEC" -m "Updating Audiobookshelf to ${LATEST}"
+	UPDATED=1
+fi
 
-	DATE="$(date "+%a %b %d %Y")"
-	USER="Lars Kiesow <lkiesow@uos.de>"
-	sed -i "s/^\(Version: *\)[^ ]*$/\1${LATEST}/" audiobookshelf.spec
-	sed -i "s/^%changelog/%changelog\n\* ${DATE} ${USER} - ${LATEST}-1\n- Update to ${LATEST}\n/" audiobookshelf.spec
 
-	git commit audiobookshelf.spec -m "Updating Audiobookshelf to ${LATEST}"
+echo "Checking Node.js"
+
+NODE="$(sed -n 's/^%define node *\([^ ]*\).*$/\1/p' "$SPEC")"
+NODE_MAJOR="${NODE%%.*}"
+NODE_LATEST="$(
+	curl -s 'https://nodejs.org/dist/index.json' \
+		| jq -r "[.[] | select(.version | startswith(\"v${NODE_MAJOR}.\"))][0].version" \
+		| sed 's/^v//'
+	)"
+
+echo "Latest Node.js ${NODE_MAJOR}.x: $NODE_LATEST"
+echo "Bundled Node.js:    $NODE"
+
+if [ -n "$NODE_LATEST" ] && [ "$NODE_LATEST" != null ] && [ "$NODE_LATEST" != "$NODE" ]; then
+	echo "Updating Node.js to ${NODE_LATEST}"
+	sed -i "s/^\(%define node *\)[^ ]*$/\1${NODE_LATEST}/" "$SPEC"
+	if [ -n "$UPDATED" ]; then
+		append_changelog "Update Node.js to ${NODE_LATEST}"
+	else
+		set_release "$(( $(spec_field Release | sed 's/%.*//') + 1 ))"
+		add_changelog "Update Node.js to ${NODE_LATEST}"
+	fi
+	git commit "$SPEC" -m "Updating Node.js to ${NODE_LATEST}"
 fi
