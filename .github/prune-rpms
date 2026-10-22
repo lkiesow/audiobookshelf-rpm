@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Remove old versions of a package from the RPM repository in the current
+# directory, keeping only the newest ones. Removed files are staged with
+# `git rm`, the repository metadata is not touched.
+#
+# Usage: prune-rpms <package name> [<number of rpms to keep>]
+
+set -euo pipefail
+shopt -s nullglob
+
+NAME="${1:?usage: $0 <package name> [<number of rpms to keep>]}"
+KEEP="${2:-10}"
+
+# Only match this exact package. The glob requires a digit after the name so
+# that e.g. `audiobookshelf` never matches `audiobookshelf-repository`.
+RPMS=( "${NAME}"-[0-9]*.rpm )
+
+if [ "${#RPMS[@]}" -le "${KEEP}" ]; then
+	echo "Found ${#RPMS[@]} ${NAME} rpms, nothing to remove"
+	exit 0
+fi
+
+printf '%s\n' "${RPMS[@]}" \
+	| sort --version-sort \
+	| head -n "-${KEEP}" \
+	| while read -r RPM; do
+		echo "Removing ${RPM}"
+		git rm -q -- "${RPM}"
+	done

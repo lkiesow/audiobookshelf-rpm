@@ -68,6 +68,10 @@ jobs:
         run: |
           rpmbuild -ba audiobookshelf.spec
 
+      - name: install helper scripts
+        run: |
+          install -m 755 .github/prune-rpms /usr/local/bin/prune-rpms
+
       - name: switch to repository branch
         run: |
           chown root:root .
@@ -85,6 +89,10 @@ jobs:
       - name: add new rpms
         run: |
           git add ./*.rpm
+
+      - name: remove old audiobookshelf rpms
+        run: |
+          prune-rpms audiobookshelf 10
 
       - name: update repository metadata
         run: |
