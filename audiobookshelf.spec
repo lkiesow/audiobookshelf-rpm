@@ -10,8 +10,8 @@
 
 
 Name:          audiobookshelf
-Version:       2.37.1
-Release:       4%{?dist}
+Version:       2.37.2
+Release:       1%{?dist}
 Summary:       A self-hosted audiobook and podcast server.
 
 Group:         Applications/Multimedia
@@ -142,6 +142,9 @@ restorecon -R -v "%{_datadir}/%{name}/client/dist/" || :
 
 
 %changelog
+* Sat Oct 24 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.2-1
+- Update to 2.37.2
+
 * Thu Oct 22 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.1-4
 - Build and run the compiled server entry point (dist-server/index.js)
   like upstream's Docker and Debian packages instead of prod.js
