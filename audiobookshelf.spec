@@ -6,12 +6,12 @@
 %define uid   audiobookshelf
 %define gid   audiobookshelf
 
-%define node  24.22.2
+%define node  24.22.3
 
 
 Name:          audiobookshelf
 Version:       2.37.2
-Release:       2%{?dist}
+Release:       3%{?dist}
 Summary:       A self-hosted audiobook and podcast server.
 
 Group:         Applications/Multimedia
@@ -142,6 +142,9 @@ restorecon -R -v "%{_datadir}/%{name}/client/dist/" || :
 
 
 %changelog
+* Thu Nov 12 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.2-3
+- Update Node.js to 24.22.3
+
 * Thu Oct 29 2026 Lars Kiesow <lkiesow@uos.de> - 2.37.2-2
 - Update Node.js to 24.22.2
 
